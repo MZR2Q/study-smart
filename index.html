@@ -7,10 +7,19 @@
   <meta name="description" content="Study Smart — ارفع سلايدات المحاضرة PDF واحصل على ملخص وشرح مبسّط لكل سلايد، اسأل عن السلايد، سوّ كويز، وناقش الشابتر — بالاعتماد على Claude." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <!-- الخط الرسمي لكود المنصات: IBM Plex Sans Arabic -->
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+  <!-- ===== شريط الهوية العلوي (طابع كود المنصات) ===== -->
+  <div class="gov-bar">
+    <div class="gov-inner">
+      <span><strong>ذاكر بذكاء</strong> — أداة تعليمية</span>
+      <span>هوية بصرية مستوحاة من نظام <strong>كود المنصات</strong> · IBM Plex Sans Arabic</span>
+    </div>
+  </div>
+
   <!-- ===== Header ===== -->
   <header class="app-header">
     <div class="brand" data-link="#/">
@@ -193,6 +202,32 @@
     </section>
 
   </main>
+
+  <!-- ===== التذييل ===== -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <strong>ذاكر بذكاء · Study Smart</strong>
+          <p>أداة مذاكرة ذكية تحوّل سلايدات محاضرتك (PDF) إلى شرح مبسّط لكل سلايد، مع أسئلة وكويز ونقاش — بالاعتماد على Claude.</p>
+        </div>
+        <div class="footer-col">
+          <h4>روابط</h4>
+          <a href="#/">الرئيسية</a>
+          <a href="#/settings">الإعدادات</a>
+        </div>
+        <div class="footer-col">
+          <h4>عن الهوية</h4>
+          <a href="https://design.dga.gov.sa" target="_blank" rel="noopener">نظام كود المنصات</a>
+          <a href="#/settings">الخصوصية ومفتاح الـ API</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="yr"></span> ذاكر بذكاء — جميع الحقوق محفوظة.</span>
+        <span class="compliance-badge"><span class="tick">✦</span> هوية بصرية مستوحاة من كود المنصات (DGA)</span>
+      </div>
+    </div>
+  </footer>
 
   <!-- ===== Quiz modal ===== -->
   <div class="modal" id="quizModal" hidden>

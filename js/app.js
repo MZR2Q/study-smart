@@ -678,6 +678,7 @@
     setupChapter();
     setupSettings();
     refreshKeyStatus();
+    const yr = document.getElementById('yr'); if (yr) yr.textContent = new Date().getFullYear();
 
     window.addEventListener('hashchange', route);
     route();
