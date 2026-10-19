@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ذاكر بذكاء · Study Smart</title>
+  <meta name="description" content="Study Smart — ارفع سلايدات المحاضرة PDF واحصل على ملخص وشرح مبسّط لكل سلايد، اسأل عن السلايد، سوّ كويز، وناقش الشابتر — بالاعتماد على Claude." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- ===== Header ===== -->
+  <header class="app-header">
+    <div class="brand" data-link="#/">
+      <div class="brand-mark">ذ</div>
+      <div class="brand-text">
+        <strong>ذاكر بذكاء</strong>
+        <span>Study Smart</span>
+      </div>
+    </div>
+    <nav class="main-nav">
+      <a href="#/" data-nav="home">الرئيسية</a>
+      <a href="#/settings" data-nav="settings">الإعدادات</a>
+      <span id="keyStatus" class="key-status" title="حالة مفتاح Claude"></span>
+    </nav>
+  </header>
+
+  <main id="app">
+
+    <!-- ===== View: Upload ===== -->
+    <section class="view" data-view="upload">
+      <div class="hero">
+        <h1>ذاكر بذكاء <span class="accent">ذكاءً فعليًا</span></h1>
+        <p class="lead">ارفع سلايدات محاضرتك (PDF)، وبيحلّلها لك النظام: كم صفحة، وش العنوان، وش المواضيع — وبعدها تختار السلايدات اللي تبي تذاكرها ويشرحها لك واحدة واحدة.</p>
+      </div>
+
+      <div id="dropZone" class="dropzone">
+        <input type="file" id="fileInput" accept="application/pdf" hidden />
+        <div class="dz-icon">📄</div>
+        <p class="dz-title">اسحب ملف الـ PDF هنا، أو اضغط للاختيار</p>
+        <p class="dz-hint">يُفضّل أن تكون السلايدات نصّية (قابلة للنسخ) حتى يقرأها النظام بدقة.</p>
+        <button class="btn btn-primary" id="pickBtn" type="button">اختيار ملف PDF</button>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature"><span>🧾</span><h3>ملخّص الملف</h3><p>عدد الصفحات، العنوان، والمواضيع الرئيسية.</p></div>
+        <div class="feature"><span>🧠</span><h3>شرح لكل سلايد</h3><p>شرح مبسّط وسلس بجانب السلايد نفسها.</p></div>
+        <div class="feature"><span>❓</span><h3>اسأل عن السلايد</h3><p>أي سؤال عن السلايد الحالية تجاوبك عليه.</p></div>
+        <div class="feature"><span>📝</span><h3>كويز ونقاش</h3><p>كوّن اختبار للسلايدات، وناقش الشابتر كامل.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== View: Overview + select ===== -->
+    <section class="view" data-view="overview">
+      <div class="overview-head">
+        <div>
+          <h2 id="ovTitle">...</h2>
+          <div class="meta-chips">
+            <span class="chip" id="ovPages"></span>
+            <span class="chip" id="ovFile"></span>
+          </div>
+        </div>
+        <button class="btn btn-ghost" data-link="#/">↺ ملف آخر</button>
+      </div>
+
+      <div class="overview-body">
+        <div class="card ov-summary">
+          <h3>الملخّص العام</h3>
+          <div id="ovSummary" class="prose"><div class="skeleton-lines"><span></span><span></span><span></span></div></div>
+          <h3>المواضيع في الملف</h3>
+          <div id="ovTopics" class="topics"></div>
+        </div>
+      </div>
+
+      <div class="select-head">
+        <h3>اختر السلايدات اللي تبي تذاكرها</h3>
+        <div class="select-actions">
+          <button class="btn btn-ghost btn-sm" id="selectAll" type="button">تحديد الكل</button>
+          <button class="btn btn-ghost btn-sm" id="selectNone" type="button">إلغاء التحديد</button>
+          <span class="sel-count" id="selCount">0 محددة</span>
+        </div>
+      </div>
+      <div id="thumbGrid" class="thumb-grid"></div>
+
+      <div class="sticky-cta">
+        <button class="btn btn-primary btn-lg" id="startStudy" type="button" disabled>ابدأ المذاكرة ◂</button>
+      </div>
+    </section>
+
+    <!-- ===== View: Study ===== -->
+    <section class="view" data-view="study">
+      <div class="study-topbar">
+        <button class="btn btn-ghost btn-sm" data-link="#/overview">◂ رجوع للسلايدات</button>
+        <div class="study-title" id="studyTitle"></div>
+        <div class="study-tools">
+          <button class="btn btn-soft btn-sm" id="openQuiz" type="button">📝 كويز</button>
+          <button class="btn btn-soft btn-sm" id="openChapter" type="button">💬 نقاش الشابتر</button>
+        </div>
+      </div>
+
+      <div class="study-grid">
+        <!-- Left: explanation + ask -->
+        <div class="col col-explain">
+          <div class="col-head">
+            <h3>الشرح</h3>
+            <button class="btn btn-ghost btn-sm" id="regenExplain" type="button" title="إعادة توليد الشرح">↻</button>
+          </div>
+          <div id="explainBox" class="prose explain-box"></div>
+
+          <div class="ask-block">
+            <h4>اسأل عن هذه السلايد</h4>
+            <div id="askThread" class="thread"></div>
+            <form id="askForm" class="composer">
+              <input type="text" id="askInput" placeholder="اكتب سؤالك عن السلايد الحالية..." autocomplete="off" />
+              <button class="btn btn-primary btn-sm" type="submit">إرسال</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Middle: slide -->
+        <div class="col col-slide">
+          <div class="slide-stage">
+            <canvas id="slideCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Right: navigation -->
+        <div class="col col-nav">
+          <div class="col-head"><h3>السلايدات</h3></div>
+          <div class="nav-counter"><span id="navPos">1 / 1</span></div>
+          <div class="nav-buttons">
+            <button class="btn btn-soft" id="prevSlide" type="button">السابقة ▸</button>
+            <button class="btn btn-soft" id="nextSlide" type="button">◂ التالية</button>
+          </div>
+          <div id="navList" class="nav-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== View: Settings ===== -->
+    <section class="view" data-view="settings">
+      <div class="settings-wrap">
+        <h2>الإعدادات</h2>
+        <p class="lead">حط هنا مفتاح Claude API الخاص فيك واضغط حفظ. المفتاح يُخزَّن محليًا في متصفحك فقط (localStorage) ولا يُرفع لأي مكان — يستخدمه النظام تلقائيًا لكل العمليات.</p>
+
+        <form id="settingsForm" class="card settings-card">
+          <label class="field">
+            <span>مفتاح Claude API</span>
+            <div class="input-reveal">
+              <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" />
+              <button type="button" class="reveal-btn" id="revealKey" title="إظهار/إخفاء">👁</button>
+            </div>
+            <small>تحصل عليه من لوحة تحكم Anthropic: <span dir="ltr">console.anthropic.com</span></small>
+          </label>
+
+          <label class="field">
+            <span>الموديل</span>
+            <select id="modelSelect">
+              <option value="claude-opus-5-5">Claude Opus 5.5 — الأذكى (افتراضي)</option>
+              <option value="claude-sonnet-5-5">Claude Sonnet 5.5 — متوازن</option>
+              <option value="claude-haiku-5-5">Claude Haiku 5.5 — الأسرع والأرخص</option>
+            </select>
+            <small>للطالب اللي عنده سلايدات كثيرة، Haiku أو Sonnet أوفر.</small>
+          </label>
+
+          <label class="field">
+            <span>لغة الشرح</span>
+            <select id="langSelect">
+              <option value="ar">العربية (مع المصطلحات بالإنجليزي)</option>
+              <option value="en">English</option>
+              <option value="same">نفس لغة السلايدات</option>
+            </select>
+          </label>
+
+          <details class="advanced">
+            <summary>إعدادات متقدمة</summary>
+            <label class="field">
+              <span>عنوان الـ API (اختياري)</span>
+              <input type="text" id="baseUrlInput" placeholder="https://api.anthropic.com" dir="ltr" autocomplete="off" />
+              <small>اتركه فاضي إلا إذا تستخدم بروكسي خاص.</small>
+            </label>
+          </details>
+
+          <div class="settings-actions">
+            <button class="btn btn-primary" type="submit">حفظ</button>
+            <button class="btn btn-ghost" type="button" id="testConn">اختبار الاتصال</button>
+            <span id="settingsMsg" class="settings-msg"></span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== Quiz modal ===== -->
+  <div class="modal" id="quizModal" hidden>
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>📝 كويز</h3>
+        <button class="icon-btn" data-close="quizModal" type="button">✕</button>
+      </div>
+      <div class="modal-body" id="quizBody"></div>
+    </div>
+  </div>
+
+  <!-- ===== Chapter chat modal ===== -->
+  <div class="modal" id="chapterModal" hidden>
+    <div class="modal-box modal-tall">
+      <div class="modal-head">
+        <h3>💬 نقاش الشابتر</h3>
+        <button class="icon-btn" data-close="chapterModal" type="button">✕</button>
+      </div>
+      <div class="modal-body chapter-body">
+        <div id="chapterThread" class="thread chapter-thread"></div>
+        <form id="chapterForm" class="composer">
+          <input type="text" id="chapterInput" placeholder="اسأل أو ناقش أي شيء عن الشابتر كامل..." autocomplete="off" />
+          <button class="btn btn-primary btn-sm" type="submit">إرسال</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Toast + overlay ===== -->
+  <div id="toast" class="toast" hidden></div>
+  <div id="busy" class="busy-overlay" hidden>
+    <div class="spinner"></div>
+    <p id="busyText">جاري المعالجة...</p>
+  </div>
+
+  <!-- PDF.js (UMD build, exposes window.pdfjsLib) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="js/claude-api.js"></script>
+  <script src="js/pdf-handler.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
